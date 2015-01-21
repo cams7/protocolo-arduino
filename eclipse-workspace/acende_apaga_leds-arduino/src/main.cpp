@@ -40,6 +40,10 @@ void initVariant() __attribute__((weak));
 
 int8_t statusLED = (int8_t) HIGH;
 
+uint8_t pin = 0x00;
+uint16_t pinValue = 0x0000;
+uint8_t statusValue = 0x00;
+
 Thread* ledThread = new Thread();
 ThreadController* controll = new ThreadController();
 
@@ -103,8 +107,28 @@ void acendeApagaLED(void) {
 
 	digitalWrite(PIN_LED, statusLED);
 
-	uint8_t* protocol = ArduinoProtocol::send(ArduinoStatus::DIGITAL, PIN_LED,
-			statusLED, ArduinoStatus::SEND);
+	if (pin <= ArduinoStatus::PIN_MAX)
+		pin++;
+	else
+		pin = 0x00;
+
+	if (pinValue <= ArduinoStatus::PIN_VALUE_MAX)
+		pinValue++;
+	else
+		pinValue = 0x0000;
+
+	if (pin % 3 == 0)
+		statusValue = ArduinoStatus::SEND;
+	else if (pin % 5 == 0)
+		statusValue = ArduinoStatus::SEND_RESPONSE;
+	else if (pin % 10 == 0)
+		statusValue = ArduinoStatus::RESPONSE_RESPONSE;
+	else
+		statusValue = ArduinoStatus::RESPONSE;
+
+	uint8_t* protocol = ArduinoProtocol::send(
+			pin % 2 == 0 ? ArduinoStatus::DIGITAL : ArduinoStatus::ANALOG, pin,
+			pinValue, statusValue);
 
 	if (protocol != NULL) {
 		Serial.write(protocol, ArduinoProtocol::TOTAL_BYTES_PROTOCOL);

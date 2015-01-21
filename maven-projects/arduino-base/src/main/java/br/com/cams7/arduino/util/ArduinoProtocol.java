@@ -12,7 +12,7 @@ public final class ArduinoProtocol {
 	// Total de BITs reservado para o INDICE - 4 bits
 	private static final byte TOTAL_BITS_INDEX = 0x04;
 	// Total de BITs reservado para o CRC - 8 bits
-	// private static final byte TOTAL_BITS_CHECKSUM = 0x08;
+	private static final byte TOTAL_BITS_CHECKSUM = 0x08;
 
 	// Total de BITs reservado para os DADOs - 20 bits
 	// private static final byte TOTAL_BITS_DATA = TOTAL_BITS_PROTOCOL -
@@ -26,7 +26,8 @@ public final class ArduinoProtocol {
 	// para o VALOR do pino - 10
 	// bits
 
-	private static ArduinoStatus decode(Integer[] values) throws ArduinoException {
+	private static ArduinoStatus decode(Integer[] values)
+			throws ArduinoException {
 		int protocol = 0x00000000;
 		final int TOTAL_BYTES = values.length;
 
@@ -38,9 +39,11 @@ public final class ArduinoProtocol {
 			protocol |= (byteValue & mask);
 		}
 
-		int checksumProtocol = protocol & 0x000000FF;// 0000_0000_000000_0000000000_11111111
+		byte checksumProtocol = (byte) (protocol & 0x000000FF);// 0000_0000_000000_0000000000_11111111
 
-		int checksum = checksumProtocol;
+		int message = (protocol & 0x0FFFFF00) >> TOTAL_BITS_CHECKSUM;// 0000_1111_111111_1111111111_00000000
+
+		byte checksum = Checksum.getCrc3Bytes(message);
 
 		if (checksumProtocol != checksum)
 			throw new ArduinoException("CRC invalido");
@@ -56,6 +59,7 @@ public final class ArduinoProtocol {
 				- TOTAL_BITS_INDEX - 4 - TOTAL_BITS_PIN);// 0000_0000_111111_0000000000_00000000
 		int pinValue = (protocol & 0x0003FF00) >> (TOTAL_BITS_PROTOCOL
 				- TOTAL_BITS_INDEX - 4 - TOTAL_BITS_PIN - TOTAL_BITS_PIN_VALUE);// 0000_0000_000000_1111111111_00000000
+																				// 00001111111111111111111100000000
 
 		Transmitter transmitter = getTransmitter(transmitterValue);
 		Status status = getStatus(statusValue);
@@ -122,7 +126,8 @@ public final class ArduinoProtocol {
 		return pinType;
 	}
 
-	public static ArduinoStatus receive(Integer[] values) throws ArduinoException {
+	public static ArduinoStatus receive(Integer[] values)
+			throws ArduinoException {
 		return decode(values);
 	}
 
