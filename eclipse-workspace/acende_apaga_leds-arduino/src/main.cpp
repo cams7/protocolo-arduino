@@ -18,12 +18,13 @@
  */
 
 #include <Arduino.h>
-#include <Protocol.h>
+#include <ArduinoProtocol.h>
+#include <ArduinoStatus.h>
 #include <Thread.h>
 #include <ThreadController.h>
 
 #define BAUD_RATE 9600
-#define LED_TIME  1000 // 1 segundo
+#define LED_TIME  500 // 1 segundo
 #define PIN_LED   13   //Pino 13
 
 using namespace SISBARC;
@@ -102,12 +103,12 @@ void acendeApagaLED(void) {
 
 	digitalWrite(PIN_LED, statusLED);
 
-	uint8_t* protocol;
+	uint8_t* protocol = ArduinoProtocol::send(ArduinoStatus::DIGITAL, PIN_LED,
+			statusLED, ArduinoStatus::SEND);
 
-	protocol = Protocol::send(PIN_LED, Protocol::DIGITAL,
-			statusLED, Protocol::SEND);
-	Serial.write(protocol, 4);
-
-	free(protocol);
+	if (protocol != NULL) {
+		Serial.write(protocol, ArduinoProtocol::TOTAL_BYTES_PROTOCOL);
+		free(protocol);
+	}
 
 }

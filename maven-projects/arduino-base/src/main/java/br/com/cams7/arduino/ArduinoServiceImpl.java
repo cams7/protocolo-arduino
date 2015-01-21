@@ -15,8 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.TooManyListenersException;
 
-import br.com.cams7.arduino.util.Protocol;
-import br.com.cams7.arduino.util.Arduino;
+import br.com.cams7.arduino.util.ArduinoProtocol;
+import br.com.cams7.arduino.util.ArduinoStatus;
 import br.com.cams7.arduino.util.Binary;
 
 public abstract class ArduinoServiceImpl implements ArduinoService, Runnable,
@@ -254,7 +254,7 @@ public abstract class ArduinoServiceImpl implements ArduinoService, Runnable,
 			if (serialData.size() == TOTAL_BYTES) {
 				Integer[] values = serialData.toArray(new Integer[TOTAL_BYTES]);
 				try {
-					Arduino arduino = Protocol.receive(values);
+					ArduinoStatus arduino = ArduinoProtocol.receive(values);
 					System.out.println(arduino);
 				} catch (ArduinoException e) {
 					// TODO Auto-generated catch block

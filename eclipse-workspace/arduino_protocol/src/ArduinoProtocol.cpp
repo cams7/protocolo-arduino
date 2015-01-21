@@ -5,39 +5,26 @@
  *      Author: cams7
  */
 
-#include "Protocol.h"
+#include "ArduinoProtocol.h"
 
 namespace SISBARC {
 
-const transmitter Protocol::ARDUINO = 0x00;
-const transmitter Protocol::PC = 0x01;
+const uint32_t ArduinoProtocol::EMPTY_BITS = 0x00000000;
 
-const status Protocol::SEND = 0x00;
-const status Protocol::SEND_RESPONSE = 0x01;
-const status Protocol::RESPONSE = 0x02;
-const status Protocol::RESPONSE_RESPONSE = 0x03;
+const uint8_t ArduinoProtocol::TOTAL_BITS_PROTOCOL = 0x20; //Total de BITs do protocolo - 32 bits
 
-const pin_type Protocol::DIGITAL = 0x00;
-const pin_type Protocol::ANALOG = 0x01;
+const uint8_t ArduinoProtocol::TOTAL_BITS_INDEX = 0x04; //Total de BITs reservado para o INDICE - 4 bits
+const uint8_t ArduinoProtocol::TOTAL_BITS_CHECKSUM = 0x08; //Total de BITs reservado para o CRC - 8 bits
+const uint8_t ArduinoProtocol::TOTAL_BITS_DATA = TOTAL_BITS_PROTOCOL
+		- TOTAL_BITS_INDEX - TOTAL_BITS_CHECKSUM; //Total de BITs reservado para os DADOs - 20 bits
 
-const uint8_t Protocol::PIN_MAX = 0x3F; //63
-const uint16_t Protocol::PIN_VALUE_MAX = 0x3FF; //1023
+const uint8_t ArduinoProtocol::TOTAL_BITS_PIN = 0x06; //Total de BITs reservado para o PINO - 6 bits
+const uint8_t ArduinoProtocol::TOTAL_BITS_PIN_VALUE = 0x0A; //Total de BITs reservado para o VALOR do pino - 10 bits
 
-const uint32_t Protocol::EMPTY_BITS = 0x00000000;
-
-const uint8_t Protocol::TOTAL_BITS_PROTOCOL = 0x20; //Total de BITs do protocolo - 32 bits
-
-const uint8_t Protocol::TOTAL_BITS_INDEX = 0x04; //Total de BITs reservado para o INDICE - 4 bits
-const uint8_t Protocol::TOTAL_BITS_CHECKSUM = 0x08; //Total de BITs reservado para o CRC - 8 bits
-const uint8_t Protocol::TOTAL_BITS_DATA = TOTAL_BITS_PROTOCOL - TOTAL_BITS_INDEX
-		- TOTAL_BITS_CHECKSUM; //Total de BITs reservado para os DADOs - 20 bits
-
-const uint8_t Protocol::TOTAL_BITS_PIN = 0x06; //Total de BITs reservado para o PINO - 6 bits
-const uint8_t Protocol::TOTAL_BITS_PIN_VALUE = 0x0A; //Total de BITs reservado para o VALOR do pino - 10 bits
+const uint8_t ArduinoProtocol::TOTAL_BYTES_PROTOCOL = 0x04; //Total de BYTEs do protocolo - 4 bytes
 
 //cria o protocolo
-uint32_t Protocol::encode(uint8_t pin, pin_type pinType, uint16_t pinValue,
-		status statusValue) {
+uint32_t ArduinoProtocol::encode(ArduinoStatus* arduino) {
 
 	//Protocolo Arduino
 	//0000 0 00 0 000000 0000000000 00000000
@@ -52,20 +39,23 @@ uint32_t Protocol::encode(uint8_t pin, pin_type pinType, uint16_t pinValue,
 	//0-123 _ VALOR PIN                                    10bits
 	//0-255 _ CRC                                           8bits
 
-	//Os pinos estao entre 0-63
-	if (pin > PIN_MAX)
-		return EMPTY_BITS;
-
-	//O tipos de pino sao 0/1 = DIGITAL/ANALOG
-	if (pinType > 0x01)
-		return EMPTY_BITS;
-
-	//Os valores do pino estao entre 0-1023
-	if (pinValue > PIN_VALUE_MAX)
+	if (arduino == NULL)
 		return EMPTY_BITS;
 
 	//Os status sao 0/1/2/3 = SEND/ SEND_RESPONSE/ RESPONSE/ RESPONSE_RESPONSE
-	if (statusValue > 0x01)
+	if (arduino->getStatusValue() > 0x01)
+		return EMPTY_BITS;
+
+	//O tipos de pino sao 0/1 = DIGITAL/ANALOG
+	if (arduino->getPinType() > 0x01)
+		return EMPTY_BITS;
+
+	//Os pinos estao entre 0-63
+	if (arduino->getPin() > ArduinoStatus::PIN_MAX)
+		return EMPTY_BITS;
+
+	//Os valores do pino estao entre 0-1023
+	if (arduino->getPinValue() > ArduinoStatus::PIN_VALUE_MAX)
 		return EMPTY_BITS;
 
 	//protocol = 0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 0 0 0 0 0 0 0 0 0
@@ -73,23 +63,23 @@ uint32_t Protocol::encode(uint8_t pin, pin_type pinType, uint16_t pinValue,
 
 	uint32_t protocol = EMPTY_BITS;
 
-	uint32_t aux = ARDUINO;
+	uint32_t aux = ArduinoStatus::ARDUINO;
 	aux <<= (TOTAL_BITS_DATA - 1);
 	protocol |= (aux & 0x00080000); //00000000 00001000 00000000 00000000
 
-	aux = statusValue;
+	aux = arduino->getStatusValue();
 	aux <<= (TOTAL_BITS_DATA - 3);
 	protocol |= (aux & 0x00060000); //00000000 00000110 00000000 00000000
 
-	aux = pinType;
+	aux = arduino->getPinType();
 	aux <<= (TOTAL_BITS_DATA - 4);
 	protocol |= (aux & 0x00010000); //00000000 00000001 00000000 00000000
 
-	aux = pin;
+	aux = arduino->getPin();
 	aux <<= (TOTAL_BITS_DATA - 4 - TOTAL_BITS_PIN);
 	protocol |= (aux & 0x0000FC00); //00000000 00000000 11111100 00000000
 
-	aux = pinValue;
+	aux = arduino->getPinValue();
 	protocol |= (aux & 0x000003FF); //00000000 00000000 00000011 11111111
 
 	crc checksum = Checksum::getCrc3Bytes(protocol);
@@ -127,9 +117,12 @@ uint32_t Protocol::encode(uint8_t pin, pin_type pinType, uint16_t pinValue,
 	return protocol;
 }
 
-uint8_t *Protocol::send(uint8_t pin, pin_type pinType, uint16_t pinValue,
+uint8_t *ArduinoProtocol::send(pin_type pinType, uint8_t pin, uint16_t pinValue,
 		status statusValue) {
-	uint32_t protocol = encode(pin, pinType, pinValue, statusValue);
+	ArduinoStatus* arduino = new ArduinoStatus(pinType, pin, pinValue,
+			statusValue);
+	uint32_t protocol = encode(arduino);
+	free(arduino);
 
 	if (protocol == EMPTY_BITS)
 		return NULL;
@@ -138,7 +131,7 @@ uint8_t *Protocol::send(uint8_t pin, pin_type pinType, uint16_t pinValue,
 }
 
 //Decodifica o protocolo
-uint16_t *Protocol::decode(uint8_t const message[]) {
+ArduinoStatus *ArduinoProtocol::decode(uint8_t const message[]) {
 	const uint8_t TOTAL_BYTES = 0x04;
 
 	uint32_t aux;
@@ -162,45 +155,39 @@ uint16_t *Protocol::decode(uint8_t const message[]) {
 	if (checksumProtocol != checksum)
 		return NULL;
 
-	uint16_t *pointer;
-	const uint8_t TOTAL_VALUES = 0x05;
-
-	pointer = (uint16_t*) malloc(TOTAL_VALUES);
-
-	if (pointer == NULL)
-		return NULL;
+	ArduinoStatus* arduino = new ArduinoStatus();
 
 	//0/1 _ ARDUINO/PC      1bit
 	aux = (protocol & 0x08000000)
 			>> (TOTAL_BITS_PROTOCOL - TOTAL_BITS_INDEX - 1); // 0000_1000_000000_0000000000_00000000
-	*(pointer) = aux;
+	arduino->setTransmitterValue((uint8_t) aux);
 
 	//0-3 _ SEND/SEND_RESPONSE/RESPONSE/RESPONSE_RESPONSE   2bit
 	aux = (protocol & 0x06000000)
 			>> (TOTAL_BITS_PROTOCOL - TOTAL_BITS_INDEX - 3); // 0000_0110_000000_0000000000_00000000
-	*(pointer + 1) = aux;
+	arduino->setStatusValue((uint8_t) aux);
 
 	//0/1 _ DIGITAL/ANALOG  1bit
 	aux = (protocol & 0x01000000)
 			>> (TOTAL_BITS_PROTOCOL - TOTAL_BITS_INDEX - 4); // 0000_0001_000000_0000000000_00000000
-	*(pointer + 2) = aux;
+	arduino->setPinType((uint8_t) aux);
 
 	//0-63  _ PIN           6bits
 	aux = (protocol & 0x00FC0000)
 			>> (TOTAL_BITS_PROTOCOL - TOTAL_BITS_INDEX - 4 - TOTAL_BITS_PIN); // 0000_0000_111111_0000000000_00000000
-	*(pointer + 3) = aux;
+	arduino->setPin((uint8_t) aux);
 
 	//0-123 _ VALOR PIN    10bits
 	aux = (protocol & 0x0003FF00)
 			>> (TOTAL_BITS_PROTOCOL - TOTAL_BITS_INDEX - 4 - TOTAL_BITS_PIN
 					- TOTAL_BITS_PIN_VALUE); // 0000_0000_000000_1111111111_00000000
-	*(pointer + 4) = aux;
+	arduino->setPinValue((uint16_t) aux);
 
-	return pointer;
+	return arduino;
 }
 
 //Recebe protocolo
-uint16_t *Protocol::receive(uint8_t const message[]) {
+ArduinoStatus *ArduinoProtocol::receive(uint8_t const message[]) {
 	return decode(message);
 }
 

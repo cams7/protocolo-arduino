@@ -7,7 +7,7 @@ package br.com.cams7.arduino.util;
  * @author cams7
  *
  */
-public class Arduino {
+public class ArduinoStatus {
 	public static final byte PIN_MAX = 0x3F; // Numero maximo da porta e 63
 	public static final short PIN_VALUE_MAX = 0x03FF; // Valor maximo da porta e
 														// 1023
@@ -19,15 +19,15 @@ public class Arduino {
 	private int pin;
 	private int pinValue;
 
-	public Arduino() {
+	public ArduinoStatus() {
 		super();
 	}
 
 	@Override
 	public String toString() {
-		return "[transmitter = " + getTransmitter() + ", status = "
-				+ getStatus() + ", pinType = " + getPinType() + ", pin = "
-				+ getPin() + ", pinValue = " + getPinValue() + "]";
+		return this.getClass().getName() + "[transmitter = " + getTransmitter()
+				+ ", status = " + getStatus() + ", pinType = " + getPinType()
+				+ ", pin = " + getPin() + ", pinValue = " + getPinValue() + "]";
 	}
 
 	public Transmitter getTransmitter() {

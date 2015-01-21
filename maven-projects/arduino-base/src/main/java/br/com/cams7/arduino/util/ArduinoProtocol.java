@@ -1,11 +1,11 @@
 package br.com.cams7.arduino.util;
 
 import br.com.cams7.arduino.ArduinoException;
-import br.com.cams7.arduino.util.Arduino.PinType;
-import br.com.cams7.arduino.util.Arduino.Status;
-import br.com.cams7.arduino.util.Arduino.Transmitter;
+import br.com.cams7.arduino.util.ArduinoStatus.PinType;
+import br.com.cams7.arduino.util.ArduinoStatus.Status;
+import br.com.cams7.arduino.util.ArduinoStatus.Transmitter;
 
-public final class Protocol {
+public final class ArduinoProtocol {
 
 	// Total de BITs do protocolo - 32 bits
 	private static final byte TOTAL_BITS_PROTOCOL = 0x20;
@@ -26,7 +26,7 @@ public final class Protocol {
 	// para o VALOR do pino - 10
 	// bits
 
-	private static Arduino decode(Integer[] values) throws ArduinoException {
+	private static ArduinoStatus decode(Integer[] values) throws ArduinoException {
 		int protocol = 0x00000000;
 		final int TOTAL_BYTES = values.length;
 
@@ -61,7 +61,7 @@ public final class Protocol {
 		Status status = getStatus(statusValue);
 		PinType pinType = getPinType(pinTypeValue);
 
-		Arduino arduino = new Arduino();
+		ArduinoStatus arduino = new ArduinoStatus();
 		arduino.setTransmitter(transmitter);
 		arduino.setStatus(status);
 		arduino.setPinType(pinType);
@@ -122,7 +122,7 @@ public final class Protocol {
 		return pinType;
 	}
 
-	public static Arduino receive(Integer[] values) throws ArduinoException {
+	public static ArduinoStatus receive(Integer[] values) throws ArduinoException {
 		return decode(values);
 	}
 

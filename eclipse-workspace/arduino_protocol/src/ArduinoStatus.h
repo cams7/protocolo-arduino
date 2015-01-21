@@ -1,15 +1,14 @@
 /*
- * ArduinoProtocol.h
+ * Arduino.h
  *
- *  Created on: 14/01/2015
+ *  Created on: 21/01/2015
  *      Author: cams7
  */
 
-#ifndef PROTOCOL_H_
-#define PROTOCOL_H_
+#ifndef ARDUINOSTATUS_H_
+#define ARDUINOSTATUS_H_
 
-#include "Binary.h"
-#include "Checksum.h"
+#include <Arduino.h>
 
 namespace SISBARC {
 
@@ -19,24 +18,14 @@ typedef uint8_t status;
 
 typedef uint8_t pin_type;
 
-class Protocol {
+class ArduinoStatus {
 private:
-	static const uint32_t EMPTY_BITS;
+	transmitter transmitterValue;
+	status statusValue;
+	pin_type pinType;
 
-	static const uint8_t TOTAL_BITS_PROTOCOL;
-
-	static const uint8_t TOTAL_BITS_INDEX;
-	static const uint8_t TOTAL_BITS_CHECKSUM;
-	static const uint8_t TOTAL_BITS_DATA;
-
-	static const uint8_t TOTAL_BITS_PIN;
-	static const uint8_t TOTAL_BITS_PIN_VALUE;
-
-	static uint32_t encode(uint8_t pin, pin_type pinType, uint16_t pinValue,
-			status statusValue);
-
-	static uint16_t *decode(uint8_t const message[]);
-
+	uint8_t pin;
+	uint16_t pinValue;
 public:
 	static const transmitter ARDUINO; //Mensagem enviada do Arduino
 	static const transmitter PC; //Mensagem enviada do PC
@@ -52,12 +41,28 @@ public:
 	static const uint8_t PIN_MAX;        //Numero maximo da porta e 63
 	static const uint16_t PIN_VALUE_MAX; //Valor maximo da porta e 1023
 
-	static uint8_t *send(uint8_t pin, pin_type pinType, uint16_t pinValue,
+	ArduinoStatus();
+	ArduinoStatus(pin_type pinType, uint8_t pin, uint16_t pinValue,
 			status statusValue);
 
-	static uint16_t *receive(uint8_t const message[]);
+	virtual ~ArduinoStatus();
+
+	transmitter getTransmitterValue(void);
+	void setTransmitterValue(transmitter transmitterValue);
+
+	status getStatusValue(void);
+	void setStatusValue(status statusValue);
+
+	pin_type getPinType(void);
+	void setPinType(pin_type pinType);
+
+	uint8_t getPin(void);
+	void setPin(uint8_t pin);
+
+	uint16_t getPinValue(void);
+	void setPinValue(uint16_t pinValue);
 };
 
 } /* namespace SISBARC */
 
-#endif /* PROTOCOL_H_ */
+#endif /* ARDUINOSTATUS_H_ */
