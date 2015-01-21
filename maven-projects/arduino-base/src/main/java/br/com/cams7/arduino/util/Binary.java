@@ -74,6 +74,27 @@ public final class Binary {
 		return intToBytes(value, (byte) 2);
 	}
 
+	// Converte um array de bytes em numero inteiro
+	private static int bytesToInt(final byte[] values, byte totalBytes) {
+		final byte TOTAL_BITS = 8;
+
+		int value = 0x00000000;
+
+		for (byte i = 0; i < totalBytes; i++)
+			for (byte j = TOTAL_BITS - 1; j >= 0; j--) {
+				int aux = getValueBit(values[i], j);
+				aux <<= (((totalBytes - i - 1) * TOTAL_BITS) + j);
+				value |= aux;
+			}
+
+		return value;
+	}
+
+	// Converte um array de bytes em um 'unsigned int 32'
+	public static int bytesToInt32(final byte[] values) {
+		return bytesToInt(values, (byte) 4);
+	}
+
 	// Converte um 'int' em uma string de bytes
 	public static String intToString4Bytes(int value) {
 		StringBuffer buffer = new StringBuffer();

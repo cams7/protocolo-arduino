@@ -16,11 +16,26 @@ public class ArduinoStatus {
 	private Status status;
 	private PinType pinType;
 
-	private int pin;
-	private int pinValue;
+	private byte pin;
+	private short pinValue;
 
 	public ArduinoStatus() {
 		super();
+
+		setTransmitter(Transmitter.PC);
+	}
+
+	public ArduinoStatus(PinType pinType, byte pin, short pinValue,
+			Status status) {
+		super();
+
+		setTransmitter(Transmitter.PC);
+
+		setPinType(pinType);
+		setPin(pin);
+		setPinValue(pinValue);
+
+		setStatus(status);
 	}
 
 	@Override
@@ -54,19 +69,19 @@ public class ArduinoStatus {
 		this.pinType = pinType;
 	}
 
-	public int getPin() {
+	public byte getPin() {
 		return pin;
 	}
 
-	public void setPin(int pin) {
+	public void setPin(byte pin) {
 		this.pin = pin;
 	}
 
-	public int getPinValue() {
+	public short getPinValue() {
 		return pinValue;
 	}
 
-	public void setPinValue(int pinValue) {
+	public void setPinValue(short pinValue) {
 		this.pinValue = pinValue;
 	}
 

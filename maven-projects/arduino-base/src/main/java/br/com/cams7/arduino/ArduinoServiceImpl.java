@@ -18,6 +18,7 @@ import java.util.TooManyListenersException;
 import br.com.cams7.arduino.util.ArduinoProtocol;
 import br.com.cams7.arduino.util.ArduinoStatus;
 import br.com.cams7.arduino.util.Binary;
+import br.com.cams7.arduino.util.Bytes;
 
 public abstract class ArduinoServiceImpl implements ArduinoService, Runnable,
 		SerialPortEventListener {
@@ -36,7 +37,7 @@ public abstract class ArduinoServiceImpl implements ArduinoService, Runnable,
 
 	private byte eventoAtual = EVENTO_NAO_INFORMADO;
 
-	private List<Integer> serialData;
+	private List<Byte> serialData;
 
 	/**
 	 * Construtor da classe Arduino
@@ -166,11 +167,11 @@ public abstract class ArduinoServiceImpl implements ArduinoService, Runnable,
 		case SerialPortEvent.OUTPUT_BUFFER_EMPTY:
 			break;
 		case SerialPortEvent.DATA_AVAILABLE:
-			int dadoRecebido = 0x00000000;
+			byte dadoRecebido = 0x00;
 
 			try {
 				while (input.available() > 0) {
-					dadoRecebido = input.read();
+					dadoRecebido = (byte) input.read();
 					receiveByteBySerial(dadoRecebido);
 				}
 			} catch (IOException e) {
@@ -241,18 +242,18 @@ public abstract class ArduinoServiceImpl implements ArduinoService, Runnable,
 		return serialThreadTime;
 	}
 
-	public void receiveByteBySerial(int data) {
+	public void receiveByteBySerial(byte data) {
 		final byte TOTAL_BYTES = 4;
 		byte lastBit = Binary.getLastBitByte(data);
 
 		if (0x01 == lastBit) {
-			serialData = new ArrayList<Integer>();
+			serialData = new ArrayList<Byte>();
 			serialData.add(data);
 		} else if (serialData != null) {
 			serialData.add(data);
 
 			if (serialData.size() == TOTAL_BYTES) {
-				Integer[] values = serialData.toArray(new Integer[TOTAL_BYTES]);
+				byte[] values = Bytes.toArray(serialData);
 				try {
 					ArduinoStatus arduino = ArduinoProtocol.receive(values);
 					System.out.println(arduino);
