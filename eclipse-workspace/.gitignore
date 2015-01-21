@@ -1,0 +1,6 @@
+# Eclipse
+.project
+.settings/
+.metadata
+RemoteSystemsTempFiles/
+.cproject

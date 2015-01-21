@@ -1,12 +1,11 @@
-*.class
+#git rm --cached .classpath
+#git rm -r --cached .settings
 
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
+#GIT
+#.gitignore
 
-# Package Files #
-*.jar
-*.war
-*.ear
+#Linux
+*~
 
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
-hs_err_pid*
+#Windows
+Thumbs.db

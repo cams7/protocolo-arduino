@@ -1,0 +1,18 @@
+Protocolo Arduino - 4 bytes
+
+0000 1   11  1   111111 1111111111 00000000
+	 0/1 0-3 0/1 0-255  0-1023 
+
+0000 Indice	                                                              4bit
+0/1) Dados enviado pelo "ARDUINO / PC"                                    1bit
+0-3) Dados recebido "SEND / SEND_RESPONSE / RESPONSE / RESPONSE_RESPONSE" 2bit
+0/1) Pino "DIGITAL / ANALOG"                                              1bit
+0-63) Numero do PINO                                                      6bits
+0-1023) VALOR do pino                                                    10bits
+00000000 Checksum                                                         8bits 
+
+tipo_envio   = 0/1 "ARDUINO / PC"
+status_dados = 0-3 "SEND / SEND_RESPONSE / RESPONSE / RESPONSE_RESPONSE"
+da           = 0/1 "DIGITAL / ANALOG"
+numero_pino  = 0-63
+valor_pino   = 0-1023

@@ -1,0 +1,5 @@
+#Proteus
+*.SDF
+*.DBK
+*.PWI
+#*.DSN

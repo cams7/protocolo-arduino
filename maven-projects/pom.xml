@@ -1,0 +1,139 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>br.com.cams7.sisbarc</groupId>
+	<artifactId>jmx</artifactId>
+	<version>1.0-SNAPSHOT</version>
+
+	<packaging>pom</packaging>
+
+	<name>1.1) Sistema Embarcado - Modulos JMX</name>
+	<description></description>
+	
+	<url>https://github.com/cams7/protocolo-arduino</url>
+	<licenses>
+		<license>
+			<name>Apache License, Version 2.0</name>
+			<distribution>repo</distribution>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
+		</license>
+	</licenses>	
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.build.timestamp.format>yyyyMMdd'T'HHmmss</maven.build.timestamp.format>
+
+		<!--version.compiler.plugin>3.1</version.compiler.plugin-->
+		<version.compiler.plugin>3.2</version.compiler.plugin>
+
+		<!-- maven-compiler-plugin -->
+        	<maven.compiler.target>1.7</maven.compiler.target>
+        	<maven.compiler.source>1.7</maven.compiler.source>
+		<!--maven.compiler.target>1.8</maven.compiler.target>
+        	<maven.compiler.source>1.8</maven.compiler.source-->
+		
+		<user.name>Cesar Magalhaes</user.name>
+	</properties>
+
+	<dependencyManagement>
+		<dependencies>
+			<!-- http://jlog.org/rxtx-lin.html -->
+			<!-- http://jlog.org/rxtx-win.html -->
+			<dependency>
+				<groupId>org.rxtx</groupId>
+				<artifactId>rxtx</artifactId>
+				<version>2.1.7</version>
+			</dependency>
+			
+			<dependency>
+				<groupId>br.com.cams7.sisbarc</groupId>
+				<artifactId>sisbarc-base</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>br.com.cams7.sisbarc</groupId>
+				<artifactId>arduino-base</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>br.com.cams7.sisbarc</groupId>
+				<artifactId>acende_apaga_leds_monitor-base</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<modules>
+		<module>sisbarc-base</module>
+		<module>arduino-base</module>
+		<module>acende_apaga_leds_monitor-base</module>
+		<module>acende_apaga_leds_monitor</module>
+	</modules>
+	
+	<scm>
+		<connection>scm:git:https://github.com/cams7/protocolo-arduino.git</connection>
+	</scm>
+
+	<build>
+		<finalName>${project.artifactId}</finalName>
+		<plugins>
+			<!-- Set a JDK compiler level -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>${version.compiler.plugin}</version>
+				<configuration>
+                    			<source>${maven.compiler.source}</source>
+                    			<target>${maven.compiler.target}</target>
+					<!--compilerArgument>-proc:none</compilerArgument-->
+                		</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>buildnumber-maven-plugin</artifactId>
+				<version>1.3</version>
+				<executions>
+					<execution>
+						<phase>validate</phase>
+						<goals>
+							<goal>create</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			
+			<!-- Copy project dependency -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<version>2.9</version>
+				<executions>
+					<execution>
+						<id>copy-dependencies</id>
+						<phase>package</phase>
+						<goals>
+							<goal>copy-dependencies</goal>
+						</goals>
+						<configuration>
+							<includeScope>runtime</includeScope>
+							<outputDirectory>${project.build.directory}/dependency-jars/</outputDirectory>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			
+			<!-- download source code in Eclipse, best practice -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-eclipse-plugin</artifactId>
+				<version>2.9</version>
+				<configuration>
+					<downloadSources>true</downloadSources>
+					<downloadJavadocs>false</downloadJavadocs>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>
