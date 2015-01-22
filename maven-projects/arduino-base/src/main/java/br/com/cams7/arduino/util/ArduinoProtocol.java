@@ -115,7 +115,7 @@ public final class ArduinoProtocol {
 		return protocol;
 	}
 
-	public static byte[] send(PinType pinType, byte pin, short pinValue,
+	private static byte[] send(PinType pinType, byte pin, short pinValue,
 			Status statusValue) {
 		ArduinoStatus arduino = new ArduinoStatus(pinType, pin, pinValue,
 				statusValue);
@@ -125,6 +125,71 @@ public final class ArduinoProtocol {
 			return null;
 
 		return Binary.intTo4Bytes(protocol);
+	}
+
+	public static byte[] sendPinDigital(byte pinDigital, boolean pinValue,
+			Status statusValue) throws ArduinoException {
+
+		boolean pinOk = false;
+		for (byte pin : ArduinoStatus.getPinsDigital())
+			if (pinDigital == pin)
+				pinOk = true;
+
+		if (!pinOk)
+			for (byte pin : ArduinoStatus.getPinsDigitalPWM())
+				if (pinDigital == pin)
+					pinOk = true;
+
+		if (!pinOk)
+			throw new ArduinoException("O PINO Digital nao e valido");
+
+		return send(PinType.DIGITAL, pinDigital, (short) (pinValue ? 0x0001
+				: 0x0000), statusValue);
+
+	}
+
+	public static byte[] sendPinPWM(byte pinPWM, short pinValue,
+			Status statusValue) throws ArduinoException {
+
+		boolean pinOk = false;
+		for (byte pin : ArduinoStatus.getPinsDigitalPWM())
+			if (pinPWM == pin)
+				pinOk = true;
+
+		if (!pinOk)
+			throw new ArduinoException("O PINO PWM nao e valido");
+
+		if (pinValue < 0x00)
+			throw new ArduinoException(
+					"O valor do PINO PWM e maior ou igual a '0'");
+
+		if (pinValue > 0xFF)
+			throw new ArduinoException(
+					"O valor do PINO PWM e menor ou igual a '255'");
+
+		return send(PinType.DIGITAL, pinPWM, pinValue, statusValue);
+	}
+
+	public static byte[] sendPinAnalog(byte pinAnalog, short pinValue,
+			Status statusValue) throws ArduinoException {
+
+		boolean pinOk = false;
+		for (byte pin : ArduinoStatus.getPinsAnalog())
+			if (pinAnalog == pin)
+				pinOk = true;
+
+		if (!pinOk)
+			throw new ArduinoException("O PINO Analogico nao e valido");
+
+		if (pinValue < 0x00)
+			throw new ArduinoException(
+					"O valor do PINO Analogico e maior ou igual a '0'");
+
+		if (pinValue > 0x03FF)
+			throw new ArduinoException(
+					"O valor do PINO Analogico e menor ou igual a '1023'");
+
+		return send(PinType.ANALOG, pinAnalog, pinValue, statusValue);
 	}
 
 	private static ArduinoStatus decode(byte[] values) throws ArduinoException {
@@ -227,30 +292,6 @@ public final class ArduinoProtocol {
 			break;
 		}
 		return pinType;
-	}
-
-	public static void main(String[] args) {
-		for (byte pin = 0x00; pin <= ArduinoStatus.PIN_MAX; pin++) {
-			for (short pinValue = 0x0000; pinValue <= ArduinoStatus.PIN_VALUE_MAX; pinValue++) {
-				byte[] protocol = send(PinType.DIGITAL, pin, pinValue,
-						Status.SEND);
-
-				try {
-					ArduinoStatus arduino = receive(protocol);
-
-					if (!(Transmitter.PC == arduino.getTransmitter()
-							&& PinType.DIGITAL == arduino.getPinType()
-							&& pin == arduino.getPin()
-							&& pinValue == arduino.getPinValue() && Status.SEND == arduino
-								.getStatus())) {
-						System.out.println(arduino);
-					}
-				} catch (ArduinoException e) {
-					System.err.println(e);
-
-				}
-			}
-		}
 	}
 
 }

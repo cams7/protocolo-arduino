@@ -37,6 +37,7 @@ public:
 	static unsigned char *intToString1Byte(uint8_t value);
 
 	static uint8_t getValueBit(uint32_t value, uint8_t index);
+	static uint8_t getLastBitByte(uint8_t value);
 };
 
 } /* namespace SISBARC */

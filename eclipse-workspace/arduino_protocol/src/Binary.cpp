@@ -160,4 +160,8 @@ uint8_t Binary::getValueBit(uint32_t value, uint8_t index) {
 	return bitValue;
 }
 
+uint8_t Binary::getLastBitByte(uint8_t value) {
+	return getValueBit(value, 7);
+}
+
 } /* namespace SISBARC */

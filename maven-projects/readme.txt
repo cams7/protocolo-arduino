@@ -26,9 +26,9 @@ Linux
 
 For Windows VAIO:
 	cd ~/Desenv/github/sisbarc/java/jmx/acende_apaga_leds_monitor
-	java -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=1234 -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.local.only=false -Djava.rmi.server.hostname=192.168.0.150 -jar target/acende_apaga_leds_monitor.jar
+	java -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=1234 -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.local.only=false -Djava.rmi.server.hostname=192.168.1.7 -jar target/acende_apaga_leds_monitor.jar
 
 	
-	service:jmx:rmi:///jndi/rmi://192.168.0.150:1234/jmxrmi
+	service:jmx:rmi:///jndi/rmi://192.168.1.7:1234/jmxrmi
 	
 	
